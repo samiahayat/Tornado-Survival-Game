@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>🌪️ Magical Tornado Survival</title>
+
+<style>
+html, body{
+    width:100%;
+    height:100%;
+    margin:0;
+    padding:0;
+}
+
+
+body{
+    overflow:hidden;
+    font-family:Arial,sans-serif;
+    background:
+      linear-gradient(rgba(15,23,42,0.4), rgba(15,23,42,0.4)),
+      url("Website1/images/tornado.jpg") center/cover no-repeat fixed;
+    color:#f8fafc;
+}
+
+/* 🔥 NAVBAR */
+#navbar{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:50px;
+    background:rgba(15,23,42,0.92);
+    backdrop-filter: blur(6px);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 20px;
+    z-index:100;
+    box-shadow:0 2px 10px rgba(0,0,0,0.6);
+}
+
+.logo{
+    font-size:18px;
+    font-weight:bold;
+    color:#ff6a00;  
+    letter-spacing:1px;
+}
+
+.nav-links button{
+    background:transparent;
+    border:none;
+    color:#f8fafc;
+    font-size:14px;
+    margin-left:12px;
+    cursor:pointer;
+    padding:6px 10px;
+    border-radius:8px;
+    transition:0.3s;
+}
+
+.nav-links button:hover{
+    background:#ff6a00;
+    color:white;
+}
+
+#dashboard{
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-shadow:2px 2px 10px black;
+}
+
+.difficulty-cards{
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+
+.diff-card{
+    width:220px;
+    background:rgba(15,23,42,0.9);
+    border:2px solid #334155;
+    border-radius:16px;
+    padding:20px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.diff-card:hover{
+    transform:translateY(-8px);
+    border-color:#ff6a00;
+    box-shadow:0 0 20px rgba(255,106,0,.6);
+}
+
+.diff-card.selected{
+    border-color:#ff6a00;
+    box-shadow:0 0 25px rgba(255,106,0,.9);
+}
+
+#startBtn{
+    display:none;
+    background:#dc2626;
+    color:white;
+    width:250px;
+    padding:18px;
+    font-size:24px;
+    border-radius:16px;
+    box-shadow:0 0 20px rgba(220,38,38,.8);
+    cursor:pointer;
+}
+
+#startBtn:hover{
+    transform:scale(1.05);
+}
+#startBtn{
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+    0%{ box-shadow:0 0 10px #dc2626; }
+    50%{ box-shadow:0 0 30px #ff6a00; }
+    100%{ box-shadow:0 0 10px #dc2626; }
+}
+
+#loadingContainer{
+    display:none;
+    width:550px;
+    height:25px;
+    border:2px solid #f8fafc;
+    border-radius:12px;
+    overflow:hidden;
+    margin-top:20px;
+}
+
+#loadingBar{
+    width:0;
+    height:100%;
+    background:#ff6a00;
+}
+
+canvas{
+    position:fixed;
+    top:50px; 
+    left:0;
+    width:100%;
+    height:calc(100% - 50px);
+    display:none;
+}
+
+#hud{
+    position:fixed;
+    top:60px; 
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(15, 23, 42, 0.85);
+    padding:10px 20px;
+    border-radius:14px;
+    display:none;
+    box-shadow:0 0 15px black;
+    color:#f8fafc;
+    z-index:1001;
+}
+
+#gameControls {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    display: flex;
+    gap: 12px;
+    z-index: 1001;
+}
+
+#gameOverModal{
+    display:none;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    background:rgba(15,23,42,.95);
+    padding:40px 60px;
+    border-radius:20px;
+    text-align:center;
+    box-shadow:0 0 30px black;
+    z-index:999;
+}
+
+#gameOverModal h1{
+    font-size:50px;
+    color:#ff6a00; 
+}
+
+#gameOverModal p{
+    font-size:30px;
+    color:#facc15;
+}
+
+.modalButtons button{
+    padding:12px 30px;
+    font-size:20px;
+    margin:10px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    color:white;
+}
+
+.modalButtons button:first-child{
+    background:#ff6a00;
+}
+
+.modalButtons button:last-child{
+    background:#dc2626;
+}
+
+.popup-overlay{
+    display:none;   
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.6);
+    z-index:1000;
+    align-items:center;
+    justify-content:center;
+}
+
+.popup-box{
+    background:rgba(248,250,252,0.95); 
+    color:#1e293b;       
+    padding:30px 40px;
+    border-radius:18px;
+    width:420px;
+    max-width:90%;
+    text-align:center;
+    box-shadow:0 0 30px rgba(0,0,0,0.4);
+    animation:popupScale 0.3s ease;
+}
+
+.popup-box h2{
+    color:#dc2626;
+    margin-bottom:15px;
+}
+
+.popup-box p{
+    color:#334155; 
+    font-size:16px;
+    line-height:1.6;
+}
+
+.popup-box button{
+    margin-top:20px;
+    padding:10px 30px;
+    font-size:16px;
+    background:#ff6a00;
+    border:none;
+    border-radius:10px;
+    color:white;
+    cursor:pointer;
+}
+
+.popup-box button:hover{
+    background:#ff6a00;
+}
+
+@keyframes popupScale{
+    from{ transform:scale(0.8); opacity:0; }
+    to{ transform:scale(1); opacity:1; }
+}
+
+#gameControls button {
+    width: auto; 
+    height: auto;
+    font-size: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: none;  
+    color: #ff6a00;    
+    cursor: pointer;
+    box-shadow: none;
+    transition: transform 0.2s, color 0.2s;
+}
+
+#gameControls button:hover {
+    transform: scale(1.3);
+    color: #facc15; 
+}
+
+#introScreen{
+    position:fixed;
+    inset:0;
+    background:black;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    z-index:5000;
+    animation:fadeOut 3s forwards;
+    color:#ff6a00;
+    text-align:center;
+}
+
+@keyframes fadeOut{
+    0%{opacity:1;}
+    70%{opacity:1;}
+    100%{opacity:0; visibility:hidden;}
+}
+#homeHighScorePanel {
+    position: fixed;
+    top: 60px; 
+    right: 20px;
+    background: rgba(15,23,42,0.9);
+    padding: 10px 18px;
+    border-radius: 14px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #facc15;
+    box-shadow: 0 0 15px rgba(0,0,0,0.6);
+    z-index: 999;
+    transition: all 0.5s ease;
+}
+
+#homeHighScorePanel.new-record {
+    animation: glow 1s infinite alternate;
+}
+
+@keyframes glow{
+    from{ box-shadow: 0 0 10px #facc15; }
+    to{ box-shadow: 0 0 25px #ff6a00; }
+}
+
+</style>
+</head>
+
+<body>
+
+    <div id="introScreen">
+    <h1>🌪️ THE STORM IS COMING</h1>
+    <p>Can you survive?</p>
+</div>
+
+<div id="navPopup" class="popup-overlay">
+    <div class="popup-box">
+        <h2 id="popupTitle"></h2>
+        <p id="popupContent"></p>
+        <button onclick="closePopup()">OK</button>
+    </div>
+</div>
+
+<div id="navbar">
+    <div class="logo">🌪️ Tornado Survival</div>
+    <div class="nav-links">
+        <button onclick="goHome()">🏠 Home</button>
+        <button onclick="showHowTo()">🎮 How to Play</button>
+        <button onclick="showAbout()">ℹ️ About</button>
+    </div>
+</div>
+
+<div id="dashboard">
+    <div id="homeHighScorePanel">
+    🏆 HIGH SCORE: <span id="homeHighScore">0</span>
+</div>
+
+    <h1>🌪️ Tornado Survival</h1>
+    <h2>Select Difficulty</h2>
+<div class="difficulty-cards">
+    <div class="diff-card" onclick="selectDifficulty('easy',this)">
+        <h2>🌱 Easy</h2>
+        
+    </div>
+
+    <div class="diff-card" onclick="selectDifficulty('medium',this)">
+        <h2>🔥 Medium</h2>
+       
+    </div>
+
+    <div class="diff-card" onclick="selectDifficulty('hard',this)">
+        <h2>💀 Hard</h2>
+       
+    </div>
+</div>
+
+    <button id="startBtn" onclick="startNow()">START NOW</button>
+
+    <div id="loadingContainer">
+        <div id="loadingBar"></div>
+    </div>
+</div>
+
+<div id="hud">
+    ❤️ Health: <span id="health">10</span> |
+    🪙 Score: <span id="score">0</span>
+</div>
+
+
+<div id="gameOverModal">
+    <canvas id="fireworkCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none;"></canvas>
+    <h1>💀 GAME OVER</h1>
+    <p id="finalScore">Score: 0</p>
+    <div class="modalButtons">
+        <button onclick="goHomeFromGameOver()">🏠 Home</button>
+        <button id="exitBtn">❌ Exit</button>
+    </div>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<div id="gameControls" style="display:none;">
+    <button id="pauseBtn" onclick="pauseGame()">⏸️</button>
+    <button id="resumeBtn" onclick="resumeGame()">▶️</button>
+</div>
+<div id="powerUpDisplay" style="position: fixed; top: 120px; right: 20px; display: flex; gap: 10px; z-index:1001;"></div>
+
+
+<script>
+    let activePowerUps = {}; 
+
+let bestScore = parseInt(localStorage.getItem("bestScore"));
+if (isNaN(bestScore)) bestScore = 0; 
+document.getElementById("homeHighScore").innerText = bestScore;
+
+let powerUps = [];
+let shieldActive = false;
+let speedBoostActive = false;
+
+let currentPage = "home"; 
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let isPlaying=false;
+let score=0;
+let health=10;
+let items=[];
+let coinInterval=null;
+let touchingTornado=false;
+let obstacles=[];
+
+const player={ x:0, y:0, size:40, speed:5 };
+const tornado={ x:300, y:300, size:180, vx:1, vy:1 }; 
+
+const chaseStrength = 0.02;
+tornado.vx += (player.x - tornado.x) * chaseStrength;
+tornado.vy += (player.y - tornado.y) * chaseStrength;
+
+const keys={};
+document.addEventListener("keydown",e=>keys[e.key.toLowerCase()]=true);
+document.addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+function selectDifficulty(level, btn){
+    document.querySelectorAll('.diff-card').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    const baseHealth = 10;
+
+    if(level==="easy") difficulty = { tornadoSpeed:1.4, obstacles:false, health:baseHealth, damage:1 };
+    if(level==="medium") difficulty = { tornadoSpeed:2.2, obstacles:false, health:baseHealth, damage:2 };
+    if(level==="hard") difficulty = { tornadoSpeed:3.2, obstacles:true, health:baseHealth, damage:3 };
+
+    document.getElementById("startBtn").style.display="block";
+}
+
+function resize(){
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+}
+resize();
+window.addEventListener("resize",resize);
+
+function spawnCoin(){
+    if(!isPlaying) return;
+    items.push({
+        x:Math.random()*(canvas.width-60)+30,
+        y:Math.random()*(canvas.height-60)+30
+    });
+}
+
+function spawnPowerUp(){
+    if(!isPlaying) return;
+
+    const types = ["shield", "speed"];
+    const type = types[Math.floor(Math.random()*types.length)];
+
+    powerUps.push({
+        x: Math.random()*(canvas.width-60)+30,
+        y: Math.random()*(canvas.height-60)+30,
+        type: type
+    });
+}
+
+function startCoinSpawner(){
+    clearInterval(coinInterval);
+    coinInterval=setInterval(spawnCoin,2000);
+}
+
+function createObstacles() {
+    obstacles = [];
+    const numObstacles = 6;
+    const minDistance = 150;
+
+    for (let i = 0; i < numObstacles; i++) {
+        let x, y;
+        let safe = false;
+        while(!safe){
+            x = Math.random() * (canvas.width - 100) + 50;
+            y = Math.random() * (canvas.height - 100) + 50;
+            safe = obstacles.every(o => Math.hypot(o.x - x, o.y - y) > minDistance);
+        }
+        obstacles.push({ x: x, y: y });
+    }
+}
+function startNow() {
+    if(!difficulty){
+        alert("Please select a difficulty first!");
+        return;
+    }
+
+    document.getElementById("startBtn").style.display = "none";
+    const loadingContainer = document.getElementById("loadingContainer");
+    const loadingBar = document.getElementById("loadingBar");
+    loadingContainer.style.display = "block";
+
+    let width = 0;
+    const interval = setInterval(() => {
+        width += 2;
+        loadingBar.style.width = width + "%";
+        if(width >= 100) {
+            clearInterval(interval);
+            loadingContainer.style.display = "none";
+            startGame();
+        }
+    }, 50);
+}
+
+function startGame(){
+    currentPage = "game"; 
+    document.getElementById("dashboard").style.display="none";
+    document.getElementById("hud").style.display="block";
+    canvas.style.display="block";
+
+    document.getElementById("gameControls").style.display = "flex";
+    document.getElementById("pauseBtn").style.display = "inline-block";
+    document.getElementById("resumeBtn").style.display = "none";
+
+    score = 0;
+    health = difficulty.health;
+    items = [];
+    touchingTornado = false;
+    isPlaying = true;
+
+    player.x = canvas.width / 2;
+    player.y = canvas.height / 2;
+
+    tornado.x = canvas.width / 3;
+    tornado.y = canvas.height / 3;
+
+    if(difficulty.obstacles) createObstacles();
+    else obstacles = [];
+
+    startCoinSpawner();
+    setInterval(spawnPowerUp, 7000);
+
+    requestAnimationFrame(gameLoop);
+}
+
+function checkTornadoCollision(){
+    const dist = Math.hypot(player.x - tornado.x, player.y - tornado.y);
+
+    if (dist < (tornado.size / 2 + player.size / 2)) {
+        if (!touchingTornado) {
+            if (shieldActive) {
+                shieldActive = false; 
+            } else {
+                health -= difficulty.damage; 
+                if (health <= 0) gameOver();
+            }
+            touchingTornado = true;
+        }
+    } else {
+        touchingTornado = false; 
+    }
+}
+
+function hitsObstacle(nx,ny){
+    return obstacles.some(o=>nx>o.x && nx<o.x+80 && ny>o.y && ny<o.y+80);
+}
+
+function update(){
+    let nx = player.x, ny = player.y;
+    if(keys["arrowup"]||keys["w"]) ny -= player.speed;
+    if(keys["arrowdown"]||keys["s"]) ny += player.speed;
+    if(keys["arrowleft"]||keys["a"]) nx -= player.speed;
+    if(keys["arrowright"]||keys["d"]) nx += player.speed;
+
+    if(!hitsObstacle(nx, ny)){
+        player.x = nx;
+        player.y = ny;
+    }
+
+    const playerR = player.size/2;
+    player.x = Math.min(Math.max(player.x, playerR), canvas.width-playerR);
+    player.y = Math.min(Math.max(player.y, playerR+50), canvas.height-playerR);
+
+    const dx = player.x - tornado.x;
+    const dy = player.y - tornado.y;
+    const dist = Math.hypot(dx, dy);
+    const speed = difficulty.tornadoSpeed;
+    tornado.x += (dx/dist)*speed;
+    tornado.y += (dy/dist)*speed;
+
+    const tornadoR = tornado.size/2;
+    tornado.x = Math.min(Math.max(tornado.x, tornadoR), canvas.width-tornadoR);
+    tornado.y = Math.min(Math.max(tornado.y, tornadoR+50), canvas.height-tornadoR);
+
+    checkTornadoCollision();
+   
+for(const key in activePowerUps){
+    activePowerUps[key] -= 1/60; 
+    if(activePowerUps[key] <= 0){
+        delete activePowerUps[key];
+        if(key === "shield") shieldActive = false;
+        if(key === "speed") player.speed -= 3;
+    }
+}
+
+const powerUpDisplay = document.getElementById("powerUpDisplay");
+powerUpDisplay.innerHTML = ""; 
+for(const key in activePowerUps){
+    const span = document.createElement("span");
+    if(key === "shield") span.textContent = "🛡️ " + Math.ceil(activePowerUps[key]) + "s";
+    if(key === "speed") span.textContent = "⚡ " + Math.ceil(activePowerUps[key]) + "s";
+    span.style.color = "#ff6a00";
+    span.style.fontSize = "24px";
+    powerUpDisplay.appendChild(span);
+}
+
+    items = items.filter(c=>{
+        if(Math.hypot(player.x-c.x, player.y-c.y)<35){
+            score+=10;
+            return false;
+        }
+        return true;
+    });
+
+   powerUps = powerUps.filter(p => {
+    const dist = Math.hypot(player.x - p.x, player.y - p.y);
+    if (dist < 35) {
+        if (p.type === "shield") {
+            shieldActive = true;
+            activePowerUps.shield = 5; 
+        }
+        if (p.type === "speed") { 
+            player.speed += 3;
+            activePowerUps.speed = 5;
+        }
+        return false;
+    }
+    return true;
+    });
+
+    document.getElementById("health").textContent=health;
+    document.getElementById("score").textContent=score;
+}
+
+function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+
+    ctx.font="120px Arial";
+    ctx.fillText("🌪️", tornado.x, tornado.y);
+
+    ctx.font = "60px Arial";
+ctx.fillText("🧍‍♀️", player.x, player.y);
+
+if(activePowerUps.shield) {
+    ctx.font = "30px Arial";
+    ctx.fillText("🛡️", player.x, player.y - 50);
+}
+
+if(activePowerUps.speed) {
+    ctx.font = "30px Arial";
+    ctx.fillText("⚡", player.x, player.y - 80); 
+}
+
+    ctx.font="40px Arial";
+    items.forEach(c=>ctx.fillText("🪙", c.x, c.y));
+
+    ctx.font="60px Arial";
+    obstacles.forEach(o=>ctx.fillText("🪵", o.x, o.y+45));
+
+    ctx.font="40px Arial";
+    powerUps.forEach(p=>{
+        ctx.fillText(p.type==="shield"?"🛡️":"⚡", p.x, p.y);
+    });
+}
+
+function gameLoop(){
+    if(currentPage!=="game") return;
+    if(isPlaying) update();
+    draw();
+    requestAnimationFrame(gameLoop);
+}
+
+const popup = document.getElementById("navPopup");
+const popupTitle = document.getElementById("popupTitle");
+const popupContent = document.getElementById("popupContent");
+
+function openPopup(title, content){
+    popupTitle.innerText = title;
+    popupContent.innerText = content;
+    popup.style.display = "flex";
+}
+
+function closePopup(){
+    popup.style.display = "none";
+}
+
+function goHome(){
+    if(currentPage === "home") return;
+
+    document.getElementById("dashboard").style.display="flex";
+    document.getElementById("hud").style.display="none";
+    canvas.style.display="none";
+    document.getElementById("gameControls").style.display="none"; // hide controls
+    isPlaying = false;
+    clearInterval(coinInterval);
+
+    currentPage = "home";
+    document.getElementById("exitBtn").addEventListener("click", function(){
+    const confirmExit = confirm("Are you sure you want to exit the game?");
+    if(confirmExit){
+        window.close(); 
+    } else {
+        goHome(); 
+    }
+});
+
+}
+function goHomeFromGameOver(){
+    isPlaying = false;
+    clearInterval(coinInterval);
+
+    score = 0;
+    health = 10;
+    items = [];
+    obstacles = [];
+    touchingTornado = false;
+
+    document.getElementById("gameOverModal").style.display = "none";
+    document.getElementById("hud").style.display = "none";
+    document.getElementById("gameControls").style.display = "none";
+    canvas.style.display = "none";
+
+    document.getElementById("dashboard").style.display = "flex";
+    currentPage = "home";
+}
+
+function gameOver() {
+    isPlaying = false;
+    clearInterval(coinInterval);
+    const isNewRecord = score > bestScore;
+
+    if (isNewRecord) {
+        bestScore = score;
+        localStorage.setItem("bestScore", bestScore);
+        document.getElementById("homeHighScore").innerText = bestScore;
+        document.getElementById("homeHighScorePanel").classList.add("new-record");
+
+        const fwX = fireworkCanvas.width / 2;
+        const fwY = fireworkCanvas.height / 2;
+        for (let i = 0; i < 8; i++) {
+            setTimeout(() => createPopupFirework(fwX, fwY), i * 300);
+        }
+    } else {
+        document.getElementById("homeHighScorePanel").classList.remove("new-record");
+    }
+
+    document.getElementById("finalScore").textContent = "Score: " + score;
+    document.getElementById("gameOverModal").style.display = "block";
+    document.getElementById("gameControls").style.display = "none";
+}
+
+const fireworkCanvas = document.getElementById("fireworkCanvas");
+const fwCtx = fireworkCanvas.getContext("2d");
+
+function resizeFireworkCanvas() {
+    fireworkCanvas.width = gameOverModal.clientWidth;
+    fireworkCanvas.height = gameOverModal.clientHeight;
+}
+resizeFireworkCanvas();
+window.addEventListener("resize", resizeFireworkCanvas);
+
+function showHowTo(){
+    openPopup(
+        "🎮 How to Play",
+        "• Move: W A S D or Arrow Keys\n" +
+        "• Avoid the Tornado 🌪️\n" +
+        "• Collect Coins 🪙\n" +
+        "• Survive as long as possible"
+    );
+}
+
+function showAbout(){
+    openPopup(
+        "ℹ️ About Game",
+        "🌪️ Tornado Survival\n\n" +
+        "Test your survival skills in a chaotic storm!\n" +
+        "• Dodge the tornado 🌪️ and dangerous obstacles 🪵\n" +
+        "• Collect as many coins 🪙 as you can\n" +
+        "• Challenge yourself across Easy, Medium, and Hard difficulties\n\n" +
+        "Built with HTML, CSS, and JavaScript Canvas, this game combines quick reflexes with strategy for maximum fun! ⚡🔥"
+    );
+}
+
+let soundOn = true;
+function toggleSound(){
+    soundOn = !soundOn;
+    openPopup(
+        "🔊 Sound Settings",
+        soundOn ? "Sound is now ON 🔊" : "Sound is now OFF 🔇"
+    );
+}
+
+function pauseGame() {
+    isPlaying = false;
+    clearInterval(coinInterval);
+    document.getElementById("pauseBtn").style.display = "none";
+    document.getElementById("resumeBtn").style.display = "inline-block";
+}
+
+function resumeGame() {
+    isPlaying = true;
+    startCoinSpawner(); 
+    document.getElementById("pauseBtn").style.display = "inline-block";
+    document.getElementById("resumeBtn").style.display = "none";
+    gameLoop(); 
+}
+
+document.getElementById("exitBtn").addEventListener("click", function(){
+    const confirmExit = confirm("Are you sure you want to exit the game?");
+    if(confirmExit){
+        window.close();
+    }
+});
+
+const playerSprite = new Image();
+playerSprite.src = "images/running_boy.png"; 
+
+let frameWidth = 64;
+let frameHeight = 64; 
+let currentFrame = 0;
+let totalFrames = 6; 
+
+function drawPlayer(){
+    ctx.drawImage(
+        playerSprite,
+        currentFrame * frameWidth, 0, frameWidth, frameHeight, 
+        player.x - frameWidth/2, player.y - frameHeight/2, frameWidth, frameHeight 
+    );
+    
+    currentFrame++;
+    if(currentFrame >= totalFrames) currentFrame = 0;
+}
+</script>
+</body>
+</html>
