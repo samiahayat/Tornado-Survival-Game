@@ -55,4 +55,4 @@ A web-based interactive game where player survive a tornado by navigating a char
 ---
 
 ## GitHub Link
-[View Project](https://github.com/samiahayat/Tornado Survival Game)
+(https://github.com/samiahayat/Tornado-Survival-Game)
